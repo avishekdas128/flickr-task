@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Flickr Task</string>
+    <string name="home">Home</string>
+    <string name="search">Search</string>
+    <string name="api_key">710759d4d5c7c45e5f5c9cf59872e270</string>
+    <string name="search_edit_hint">Search using any tag,title,description...</string>
+</resources>
