@@ -16,16 +16,23 @@ public class SearchDataSourceFactory extends DataSource.Factory {
     private Application application;
     private MutableLiveData<SearchDataSource> mutableLiveData;
 
-    public SearchDataSourceFactory(FlickrService flickrService, Application application,String searchText) {
+    public SearchDataSourceFactory(FlickrService flickrService, Application application) {
         this.flickrService = flickrService;
         this.application = application;
-        this.searchText = searchText;
         mutableLiveData = new MutableLiveData<>();
+    }
+
+    public void setSearchText(String searchText) {
+        this.searchText = searchText;
+    }
+
+    public String getSearchText() {
+        return searchText;
     }
 
     @Override
     public DataSource create() {
-        searchDataSource = new SearchDataSource(flickrService,application,searchText);
+        searchDataSource = new SearchDataSource(flickrService,application,getSearchText());
         mutableLiveData.postValue(searchDataSource);
         return searchDataSource;
     }

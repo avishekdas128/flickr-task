@@ -37,7 +37,6 @@ public class SearchFragment extends Fragment {
     private PhotoAdapter photoAdapter;
     private SearchViewModel searchViewModel;
     private SearchFragBinding searchFragBinding;
-    private ViewModelProvider.Factory factory;
 
 
     @Nullable
@@ -45,16 +44,10 @@ public class SearchFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         searchFragBinding = DataBindingUtil.inflate(inflater,R.layout.search_frag,container,false);
         View view = searchFragBinding.getRoot();
+        searchViewModel = ViewModelProviders.of(this).get(SearchViewModel.class);
         searchFragBinding.searchButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                factory = new ViewModelProvider.Factory() {
-                    @NonNull
-                    @Override
-                    public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-                        return (T) new SearchViewModel(getActivity().getApplication(),searchFragBinding.searchEditText.getText().toString());
-                    }
-                };
                 hideKeyboard();
                 getRecentPhotos();
             }
@@ -64,8 +57,7 @@ public class SearchFragment extends Fragment {
 
 
     public void getRecentPhotos() {
-        searchViewModel = ViewModelProviders.of(this, factory).get(SearchViewModel.class);
-        searchViewModel.getPhotoPagedList().observe(this, new Observer<PagedList<Photo>>() {
+        searchViewModel.getPhotoPagedList(searchFragBinding.searchEditText.getText().toString()).observe(this, new Observer<PagedList<Photo>>() {
             @Override
             public void onChanged(PagedList<Photo> photos) {
                 photoArrayList =  photos;

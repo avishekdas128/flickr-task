@@ -7,6 +7,7 @@ import androidx.annotation.NonNull;
 import androidx.arch.core.util.Function;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Transformations;
 import androidx.paging.LivePagedListBuilder;
 import androidx.paging.PagedList;
@@ -27,12 +28,21 @@ public class SearchViewModel extends AndroidViewModel  {
     private LiveData<NetworkState> networkStateLiveData;
     private Executor executor;
     private LiveData<PagedList<Photo>> photoPagedList;
+    SearchDataSourceFactory searchDataSourceFactory;
+    FlickrService flickrService;
 
-    public SearchViewModel(@NonNull Application application, String searchText) {
+    public SearchViewModel(@NonNull Application application) {
         super(application);
-        FlickrService flickrService = RetrofitInstance.getService();
-        Log.i("Tag",searchText);
-        SearchDataSourceFactory searchDataSourceFactory = new SearchDataSourceFactory(flickrService,application,searchText);
+        flickrService = RetrofitInstance.getService();
+        searchDataSourceFactory = new SearchDataSourceFactory(flickrService,application);
+    }
+
+    public LiveData<NetworkState> getNetworkStateLiveData() {
+        return networkStateLiveData;
+    }
+
+    public LiveData<PagedList<Photo>> getPhotoPagedList(String searchText) {
+        searchDataSourceFactory.setSearchText(searchText);
         searchDataSourceLiveData = searchDataSourceFactory.getMutableLiveData();
         networkStateLiveData = Transformations.switchMap(searchDataSourceLiveData, new Function<SearchDataSource, LiveData<NetworkState>>() {
             @Override
@@ -44,13 +54,6 @@ public class SearchViewModel extends AndroidViewModel  {
                 .setInitialLoadSizeHint(10).setPageSize(4).setPrefetchDistance(4).build();
         executor = Executors.newFixedThreadPool(5);
         photoPagedList = (new LivePagedListBuilder<Long,Photo>(searchDataSourceFactory,config)).setFetchExecutor(executor).build();
-    }
-
-    public LiveData<NetworkState> getNetworkStateLiveData() {
-        return networkStateLiveData;
-    }
-
-    public LiveData<PagedList<Photo>> getPhotoPagedList() {
         return photoPagedList;
     }
 }
