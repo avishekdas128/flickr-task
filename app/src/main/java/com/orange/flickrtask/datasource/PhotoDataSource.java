@@ -26,6 +26,7 @@ public class PhotoDataSource extends PageKeyedDataSource<Long, Photo> {
     private Application application;
     private MutableLiveData<NetworkState> networkState;
     private MutableLiveData<NetworkState> initialLoading;
+    private PhotoRepository photoRepository;
 
     public MutableLiveData<NetworkState> getNetworkState() {
         return networkState;
@@ -34,6 +35,7 @@ public class PhotoDataSource extends PageKeyedDataSource<Long, Photo> {
     public PhotoDataSource(FlickrService flickrService, Application application) {
         this.flickrService = flickrService;
         this.application = application;
+        photoRepository = new PhotoRepository(application);
         networkState = new MutableLiveData<>();
         initialLoading = new MutableLiveData<>();
     }
@@ -51,6 +53,9 @@ public class PhotoDataSource extends PageKeyedDataSource<Long, Photo> {
                 PhotoDBResponse photoDBResponse = example.getPhotos();
                 ArrayList<Photo> photos;
                 photos = (ArrayList<Photo>) photoDBResponse.getPhoto();
+                for(Photo photo : photos){
+                    photoRepository.insert(photo);
+                }
                 callback.onResult(photos,null,(long)2);
                 initialLoading.postValue(NetworkState.LOADED);
                 networkState.postValue(NetworkState.LOADED);
@@ -81,6 +86,9 @@ public class PhotoDataSource extends PageKeyedDataSource<Long, Photo> {
                 ArrayList<Photo> photos;
                 if (photoDBResponse != null && photoDBResponse.getPhoto() != null) {
                     photos = (ArrayList<Photo>) photoDBResponse.getPhoto();
+                    for(Photo photo : photos){
+                        photoRepository.insert(photo);
+                    }
                     callback.onResult(photos,params.key+1);
                 }
                 networkState.postValue(NetworkState.LOADED);

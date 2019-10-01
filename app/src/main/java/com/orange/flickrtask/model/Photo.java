@@ -10,29 +10,40 @@ import androidx.databinding.Bindable;
 import androidx.databinding.BindingAdapter;
 import androidx.databinding.library.baseAdapters.BR;
 import androidx.recyclerview.widget.DiffUtil;
+import androidx.room.ColumnInfo;
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
 
 import com.bumptech.glide.Glide;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.orange.flickrtask.R;
 
+@Entity(tableName = "photo")
 public class Photo extends BaseObservable implements Parcelable
 {
+    @PrimaryKey
+    @NonNull
+    @ColumnInfo(name = "id")
     @SerializedName("id")
     @Expose
     private String id;
     @SerializedName("owner")
     @Expose
     private String owner;
+    @ColumnInfo(name = "secret")
     @SerializedName("secret")
     @Expose
     private String secret;
+    @ColumnInfo(name = "server")
     @SerializedName("server")
     @Expose
     private String server;
+    @ColumnInfo(name = "farm")
     @SerializedName("farm")
     @Expose
     private Integer farm;
+    @ColumnInfo(name = "title")
     @SerializedName("title")
     @Expose
     private String title;
@@ -81,7 +92,6 @@ public class Photo extends BaseObservable implements Parcelable
 
     public void setId(String id) {
         this.id = id;
-        notifyPropertyChanged(BR.id);
     }
 
     @Bindable
@@ -91,7 +101,6 @@ public class Photo extends BaseObservable implements Parcelable
 
     public void setOwner(String owner) {
         this.owner = owner;
-        notifyPropertyChanged(BR.owner);
     }
 
     @Bindable
@@ -101,7 +110,6 @@ public class Photo extends BaseObservable implements Parcelable
 
     public void setSecret(String secret) {
         this.secret = secret;
-        notifyPropertyChanged(BR.secret);
     }
 
     @Bindable
@@ -111,7 +119,6 @@ public class Photo extends BaseObservable implements Parcelable
 
     public void setServer(String server) {
         this.server = server;
-        notifyPropertyChanged(BR.server);
     }
 
     @Bindable
@@ -121,7 +128,6 @@ public class Photo extends BaseObservable implements Parcelable
 
     public void setFarm(Integer farm) {
         this.farm = farm;
-        notifyPropertyChanged(BR.farm);
     }
 
     @Bindable
@@ -131,7 +137,6 @@ public class Photo extends BaseObservable implements Parcelable
 
     public void setTitle(String title) {
         this.title = title;
-        notifyPropertyChanged(BR.title);
     }
 
     @Bindable
@@ -141,7 +146,6 @@ public class Photo extends BaseObservable implements Parcelable
 
     public void setIspublic(Integer ispublic) {
         this.ispublic = ispublic;
-        notifyPropertyChanged(BR.ispublic);
     }
 
     @Bindable
@@ -151,7 +155,6 @@ public class Photo extends BaseObservable implements Parcelable
 
     public void setIsfriend(Integer isfriend) {
         this.isfriend = isfriend;
-        notifyPropertyChanged(BR.isfriend);
     }
 
     @Bindable
@@ -161,7 +164,6 @@ public class Photo extends BaseObservable implements Parcelable
 
     public void setIsfamily(Integer isfamily) {
         this.isfamily = isfamily;
-        notifyPropertyChanged(BR.isfamily);
     }
 
     public void writeToParcel(Parcel dest, int flags) {
