@@ -13,6 +13,7 @@ import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
+import androidx.paging.PagedList;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -22,13 +23,14 @@ import com.orange.flickrtask.R;
 import com.orange.flickrtask.adapter.PhotoAdapter;
 import com.orange.flickrtask.databinding.HomeFragBinding;
 import com.orange.flickrtask.model.Photo;
+import com.orange.flickrtask.utils.NetworkState;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class HomeFragment extends Fragment {
 
-    private ArrayList<Photo> photoArrayList;
+    private PagedList<Photo> photoArrayList;
     private RecyclerView recyclerView;
     private PhotoAdapter photoAdapter;
     private SwipeRefreshLayout swipeRefreshLayout;
@@ -56,10 +58,10 @@ public class HomeFragment extends Fragment {
 
 
     public void getRecentPhotos() {
-        homeViewModel.getAllPhotos().observe(this, new Observer<List<Photo>>() {
+        homeViewModel.getPhotoPagedList().observe(this, new Observer<PagedList<Photo>>() {
             @Override
-            public void onChanged(@Nullable List<Photo> moviesFromLiveData) {
-                photoArrayList = (ArrayList<Photo>) moviesFromLiveData;
+            public void onChanged(PagedList<Photo> photos) {
+                photoArrayList = photos;
                 showOnRecyclerView();
             }
         });
@@ -67,7 +69,14 @@ public class HomeFragment extends Fragment {
 
     private void showOnRecyclerView() {
         recyclerView = homeFragBinding.rvMovies;
-        photoAdapter = new PhotoAdapter(getContext(), photoArrayList);
+        photoAdapter = new PhotoAdapter(getContext());
+        photoAdapter.submitList(photoArrayList);
+        homeViewModel.getNetworkStateLiveData().observe(this, new Observer<NetworkState>() {
+            @Override
+            public void onChanged(NetworkState networkState) {
+                photoAdapter.setNetworkState(networkState);
+            }
+        });
         if (this.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
             recyclerView.setLayoutManager(new GridLayoutManager(getContext(), 2));
         } else {

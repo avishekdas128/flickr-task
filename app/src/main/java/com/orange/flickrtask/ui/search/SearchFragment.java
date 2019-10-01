@@ -13,7 +13,10 @@ import androidx.annotation.Nullable;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModel;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelProviders;
+import androidx.paging.PagedList;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -22,17 +25,19 @@ import com.orange.flickrtask.R;
 import com.orange.flickrtask.adapter.PhotoAdapter;
 import com.orange.flickrtask.databinding.SearchFragBinding;
 import com.orange.flickrtask.model.Photo;
+import com.orange.flickrtask.utils.NetworkState;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class SearchFragment extends Fragment {
 
-    private ArrayList<Photo> photoArrayList;
+    private PagedList<Photo> photoArrayList;
     private RecyclerView recyclerView;
     private PhotoAdapter photoAdapter;
     private SearchViewModel searchViewModel;
     private SearchFragBinding searchFragBinding;
+    private ViewModelProvider.Factory factory;
 
 
     @Nullable
@@ -40,10 +45,16 @@ public class SearchFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         searchFragBinding = DataBindingUtil.inflate(inflater,R.layout.search_frag,container,false);
         View view = searchFragBinding.getRoot();
-        searchViewModel = ViewModelProviders.of(this).get(SearchViewModel.class);
         searchFragBinding.searchButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                factory = new ViewModelProvider.Factory() {
+                    @NonNull
+                    @Override
+                    public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
+                        return (T) new SearchViewModel(getActivity().getApplication(),searchFragBinding.searchEditText.getText().toString());
+                    }
+                };
                 hideKeyboard();
                 getRecentPhotos();
             }
@@ -53,10 +64,11 @@ public class SearchFragment extends Fragment {
 
 
     public void getRecentPhotos() {
-        searchViewModel.getAllSearchedPhotos(searchFragBinding.searchEditText.getText().toString()).observe(this, new Observer<List<Photo>>() {
+        searchViewModel = ViewModelProviders.of(this, factory).get(SearchViewModel.class);
+        searchViewModel.getPhotoPagedList().observe(this, new Observer<PagedList<Photo>>() {
             @Override
-            public void onChanged(@Nullable List<Photo> moviesFromLiveData) {
-                photoArrayList = (ArrayList<Photo>) moviesFromLiveData;
+            public void onChanged(PagedList<Photo> photos) {
+                photoArrayList =  photos;
                 showOnRecyclerView();
             }
         });
@@ -64,7 +76,14 @@ public class SearchFragment extends Fragment {
 
     private void showOnRecyclerView() {
         recyclerView = searchFragBinding.rvPhotos;
-        photoAdapter = new PhotoAdapter(getContext(), photoArrayList);
+        photoAdapter = new PhotoAdapter(getContext());
+        photoAdapter.submitList(photoArrayList);
+        searchViewModel.getNetworkStateLiveData().observe(this, new Observer<NetworkState>() {
+            @Override
+            public void onChanged(NetworkState networkState) {
+                photoAdapter.setNetworkState(networkState);
+            }
+        });
         if (this.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
             recyclerView.setLayoutManager(new GridLayoutManager(getContext(), 2));
         } else {
