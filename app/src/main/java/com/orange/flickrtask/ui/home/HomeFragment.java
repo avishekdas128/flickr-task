@@ -1,6 +1,8 @@
 package com.orange.flickrtask.ui.home;
 
 import android.content.res.Configuration;
+import android.graphics.pdf.PdfDocument;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,9 +21,11 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import com.google.android.material.snackbar.Snackbar;
 import com.orange.flickrtask.R;
 import com.orange.flickrtask.adapter.PhotoAdapter;
 import com.orange.flickrtask.databinding.HomeFragBinding;
+import com.orange.flickrtask.datasource.PhotoRepository;
 import com.orange.flickrtask.model.Photo;
 import com.orange.flickrtask.utils.NetworkState;
 
@@ -58,6 +62,22 @@ public class HomeFragment extends Fragment {
 
 
     public void getRecentPhotos() {
+        photoAdapter = new PhotoAdapter(getContext());
+        homeViewModel.getNetworkStateLiveData().observe(this, new Observer<NetworkState>() {
+            @Override
+            public void onChanged(NetworkState networkState) {
+                photoAdapter.setNetworkState(networkState);
+                if(!(networkState == NetworkState.LOADED || networkState == NetworkState.LOADING)){
+                    Snackbar.make(swipeRefreshLayout,"No network!",Snackbar.LENGTH_LONG).setAction("RETRY", new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            homeViewModel.init(getActivity().getApplication());
+                            getRecentPhotos();
+                        }
+                    }).show();
+                }
+            }
+        });
         homeViewModel.getPhotoPagedList().observe(this, new Observer<PagedList<Photo>>() {
             @Override
             public void onChanged(PagedList<Photo> photos) {
@@ -69,14 +89,7 @@ public class HomeFragment extends Fragment {
 
     private void showOnRecyclerView() {
         recyclerView = homeFragBinding.rvMovies;
-        photoAdapter = new PhotoAdapter(getContext());
         photoAdapter.submitList(photoArrayList);
-        homeViewModel.getNetworkStateLiveData().observe(this, new Observer<NetworkState>() {
-            @Override
-            public void onChanged(NetworkState networkState) {
-                photoAdapter.setNetworkState(networkState);
-            }
-        });
         if (this.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
             recyclerView.setLayoutManager(new GridLayoutManager(getContext(), 2));
         } else {
@@ -86,4 +99,6 @@ public class HomeFragment extends Fragment {
         recyclerView.setAdapter(photoAdapter);
         photoAdapter.notifyDataSetChanged();
     }
+
+
 }

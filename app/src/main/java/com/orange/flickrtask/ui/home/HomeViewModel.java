@@ -29,6 +29,10 @@ public class HomeViewModel extends AndroidViewModel {
 
     public HomeViewModel(@NonNull Application application) {
         super(application);
+        init(application);
+    }
+
+    public void init(Application application){
         FlickrService flickrService = RetrofitInstance.getService();
         PhotoDataSourceFactory photoDataSourceFactory = new PhotoDataSourceFactory(flickrService,application);
         photoDataSourceLiveData = photoDataSourceFactory.getMutableLiveData();

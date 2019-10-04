@@ -27,6 +27,6 @@ public abstract class PhotoDatabase extends RoomDatabase {
         return Room.databaseBuilder(
                 context.getApplicationContext(),
                 PhotoDatabase.class,
-                "photo.db").build();
+                "photo.db").allowMainThreadQueries().build();
     }
 }

@@ -20,6 +20,7 @@ public class PhotoRepository {
     }
 
     public List<Photo> getMovies() {
+        new PhotoRepository.ViewAsyncTask(photoDatabase.getPhotoDAO(),photos).execute();
         return photos;
     }
 
@@ -39,6 +40,23 @@ public class PhotoRepository {
         protected Void doInBackground(final Photo... params) {
             mAsyncTaskDao.insert(params[0]);
             return null;
+        }
+    }
+
+    private static class ViewAsyncTask extends AsyncTask<Void, Void, Void> {
+
+        private PhotoDAO mAsyncTaskDao;
+        private List<Photo> photo;
+
+        ViewAsyncTask(PhotoDAO dao, List<Photo> photo) {
+            mAsyncTaskDao = dao;
+            this.photo = photo;
+        }
+
+        @Override
+        protected Void doInBackground(final Void... params) {
+            photo = mAsyncTaskDao.getPhotos();
+            return  null;
         }
     }
 }
