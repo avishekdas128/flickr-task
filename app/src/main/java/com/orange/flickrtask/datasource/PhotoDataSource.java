@@ -64,6 +64,7 @@ public class PhotoDataSource extends PageKeyedDataSource<Long, Photo> {
             public void onFailure(Call<Example> call, Throwable t) {
                 String errorMessage = t == null ? "unknown error" : t.getMessage();
                 networkState.postValue(new NetworkState(NetworkState.Status.FAILED, errorMessage));
+                callback.onResult(photoRepository.getMovies(),null,(long)2);
             }
         });
     }
@@ -97,6 +98,7 @@ public class PhotoDataSource extends PageKeyedDataSource<Long, Photo> {
             public void onFailure(Call<Example> call, Throwable t) {
                 String errorMessage = t == null ? "unknown error" : t.getMessage();
                 networkState.postValue(new NetworkState(NetworkState.Status.FAILED, errorMessage));
+                callback.onResult(photoRepository.getMovies(),params.key+1);
             }
         });
     }
