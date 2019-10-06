@@ -4,4 +4,8 @@ An image gallery app made using MVVM structure and using Flickr API implementing
 
 ->Added Offline Support using Room library for local DB caching.
 
+->Added Network Management with Snackbar support and Retry action.
+
+->Added RxJava for search implementation using debounce operator.
+
 
