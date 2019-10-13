@@ -59,8 +59,7 @@ public class HomeFragment extends Fragment {
         });
         return view;
     }
-
-
+    
     public void getRecentPhotos() {
         photoAdapter = new PhotoAdapter(getContext());
         homeViewModel.getNetworkStateLiveData().observe(this, new Observer<NetworkState>() {
